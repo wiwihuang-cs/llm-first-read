@@ -8,13 +8,13 @@
 import tiktoken  # BPE algorithm
 
 
-text_noInWordTable = "just for test"
+text = "just for test"
 
 # Build a tokenizer
 tokenizer = tiktoken.get_encoding("gpt2")
 
 # Encode the text
-integers = tokenizer.encode(text_noInWordTable)
+integers = tokenizer.encode(text)
 print(integers)
 
 # Decode the integers
