@@ -54,4 +54,4 @@ txt = "just for test"
 dataloader = Build_GPTDataLoader(txt, max_length=4, stride=1, batch_size=1, shuffle=False)
 data_iter = iter(dataloader)
 first_batch = next(data_iter)
-# print(first_batch) # DEBUG: temporary output to verify the dataloader
+# print(first_batch)  # DEBUG: temporary output to verify the dataloader
