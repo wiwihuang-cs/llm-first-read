@@ -1,7 +1,7 @@
 # llm-first-read
 My first systematic reading notes and code experiments while learning Large Language Models (LLMs).
 
-## === ML vs DL ===
+## ML vs DL
 - ml needs to choose the characters manually but DL not. 
 
 ## History of LLM (in the field of NLP)
