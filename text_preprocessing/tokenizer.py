@@ -8,7 +8,10 @@ Tokenizer:
 import tiktoken  
 
 # Sample input text
-text = "just for test"
+texts = [
+    "just for test",
+    "another test sentence",
+]
 
 # Build a tokenizer
 tokenizer = tiktoken.get_encoding("gpt2")
