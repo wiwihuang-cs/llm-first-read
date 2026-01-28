@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 
 class CausalAttention(nn.Module):
-    def __init__(self, context_length, d_in, d_out, dropout, bias= False):
+    def __init__(self, d_in, d_out, dropout, context_length, bias= False):
         super().__init__()
         self.d_out= d_out
         self.W_q= nn.Linear(d_in, d_out, bias=bias)
@@ -51,6 +51,6 @@ batch= torch.stack([inputs, inputs], dim= 0)
 
 torch.manual_seed(123)
 context_length= batch.shape[1]
-ca = CausalAttention(d_in=batch.shape[2], d_out=3, context_length= context_length, dropout=0.0)
+ca = CausalAttention(d_in=batch.shape[2], d_out=3, dropout=0.0, context_length= context_length)
 context_vecs = ca(batch)
 print(context_vecs)  # DEBUG: temporary output to verify the context vectors
