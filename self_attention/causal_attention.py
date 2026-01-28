@@ -22,6 +22,8 @@ class CausalAttention(nn.Module):
         values= self.W_v(x)
 
         attn_scores= queries @ keys.transpose(1, 2)
+
+        # Apply causal mask to prevent attending to future tokens
         attn_scores_masked= attn_scores.masked_fill(
             self.mask.bool()[:num_tokens, :num_tokens],
             -torch.inf
@@ -31,26 +33,9 @@ class CausalAttention(nn.Module):
             attn_scores_masked / (self.d_out ** 0.5),
             dim=-1
         )
+
+        # Apply dropout to attention weights for regularization
         attn_weights_dropped= self.dropout(attn_weights)
 
         context_vec= attn_weights_dropped @ values
         return context_vec
-
-inputs= torch.tensor(
-    [
-        [0.43, 0.15, 0.89],
-        [0.55, 0.87, 0.66],
-        [0.57, 0.85, 0.64],
-        [0.22, 0.58, 0.33],
-        [0.77, 0.25, 0.10],
-        [0.05, 0.80, 0.55],
-    ]
-)    
-batch= torch.stack([inputs, inputs], dim= 0)
-# print(batch.shape)  # DEBUG: temporary output to verify the batch shape
-
-torch.manual_seed(123)
-context_length= batch.shape[1]
-ca = CausalAttention(d_in=batch.shape[2], d_out=3, dropout=0.0, context_length= context_length)
-context_vecs = ca(batch)
-print(context_vecs)  # DEBUG: temporary output to verify the context vectors

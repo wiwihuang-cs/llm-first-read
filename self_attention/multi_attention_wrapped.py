@@ -11,4 +11,5 @@ class MultiHeadAttention_wrapped(nn.Module):
         )
     
     def forward(self, x):
+        # Concatenate the outputs from all attention heads
         return torch.cat([head(x) for head in self.heads], dim= -1)

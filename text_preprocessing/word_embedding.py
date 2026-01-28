@@ -6,21 +6,6 @@ from .sliding_window_with_torch import Build_GPTDataLoader
 import torch.nn as nn
 import torch
 
-# Sample input text, replace with the-verdict.txt
-text = []
-
-# Build DataLoader
-context_length = 4
-dataloader = Build_GPTDataLoader(
-    txt= text, context_length= context_length, stride= context_length,
-    batch_size= 8, shuffle= False,
-)
-
-# Gat a batch of data
-data_iter = iter(dataloader)
-inputs, targets = next(data_iter)
-
-
 def build_embedding_layer(inputs, vocab_size= 50257, output_dim= 256, context_length= 4):
     """
     Build embedding layer for tokens and positions.

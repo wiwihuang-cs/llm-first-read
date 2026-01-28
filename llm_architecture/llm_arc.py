@@ -2,20 +2,37 @@ import tiktoken
 import torch
 import torch.nn as nn
 
-# Initilize GPT-2 tokenizer
+# Sample input texts
+texts = [
+    "Every effort moves you",
+    "Every day holds a",
+]
+
+# Initialize GPT-2 tokenizer
 tokenizer = tiktoken.get_encoding("gpt2")
 
-# Tokenize raw text into token ID sequences
-txt1 = "Every effort moves you"
-txt2 = "Every day holds a"
-batch = []
-batch.append(torch.tensor(tokenizer.encode(txt1)))
-batch.append(torch.tensor(tokenizer.encode(txt2)))
+def preprocess_text(texts, tokenizer):
+    """
+    Convert raw texts into token ID sequences and stack them into a batch tensor.
+    
+    Args: 
+        texts (list of str): raw input texts.
+    
+    Returns:
+        torch.Tensor: batch tensor of token ID sequences.
+    """
 
-# Stack token ID sequences into a batch tensor
-batch = torch.stack(batch, dim= 0)
-# print(batch)  # DEBUG: temporary output to verify tokenization
+    # Tokenize raw text into token ID sequences
+    token_ids = [torch.tensor(tokenizer.encode(txt)) for txt in texts]
 
+    # Stack token ID sequences into a batch tensor
+    batch = torch.stack(token_ids, dim= 0) 
+    
+    # DEBUG: temporary output to verify tokenization
+    # print(batch)  
+    return batch
+
+# Model configuration
 cfg = {
     "vocab_size": 50257,
     "context_length": 1024,
@@ -25,6 +42,9 @@ cfg = {
     "bias": False, 
 }
 
+# ============================
+# Define feed-forward network
+# ============================
 class GELU(nn.Module):
     def __init__(self):
         super().__init__()
@@ -36,11 +56,12 @@ class GELU(nn.Module):
         ))
 
 class FeedForward(nn.Module):
+    """
+    Position-wise feed-forward network (MLP):
+    Consists of two linear layers with a non-linear activation in between.
+    """
     def __init__(self, cfg):
         super().__init__()
-
-        # Position-wise feed-forward network (MLP):
-        # two linear layers with a non-linear activation in between.
         self.layers = nn.Sequential(
             nn.Linear(cfg["emb_dim"], 4 * cfg["emb_dim"], bias= cfg["bias"]),
             GELU(),
@@ -50,34 +71,36 @@ class FeedForward(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+# Define transformer block
 class TransformerBlock(nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, x):
         return x
-    
+
+# Define GPT-2 model    
 class GPT2Model(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         
-        # Act like a lookup table that maps token ID sequences to dense vectors
         self.tok_emb = nn.Embedding(cfg["vocab_size"], cfg["emb_dim"])
         self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])
 
         self.drop_emb = nn.Dropout(cfg["drop_rate"])
+
         self.trf_blocks = nn.Sequential(
             *[TransformerBlock() for _ in range(cfg["num_layers"])]
         )
+
     def forward(self, x):
         batch_size, seq_length = x.shape
+
         tok_embeds = self.tok_emb(x)
         pos_embeds = self.pos_emb(torch.arange(seq_length, device= x.device))
         x = tok_embeds + pos_embeds
+        
         x = self.drop_emb(x)
         
         x = self.trf_blocks(x)  
         return x
-
-model = GPT2Model(cfg)
-# print(model(batch))  # DEBUG: temporary output to verify model output

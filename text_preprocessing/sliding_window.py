@@ -4,15 +4,6 @@ Sliding window
 """
 import tiktoken
 
-# Sample input text
-texts = [
-    "just for test",
-    "another test sentence",
-]
-
-# Initialize a tokenizer
-tokenizer = tiktoken.get_encoding("gpt2")
-
 def encode_text_to_tokenIDs(texts, tokenizer):
     """
     Encode raw texts into tokenID sequences.
