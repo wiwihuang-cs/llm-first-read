@@ -1,6 +1,7 @@
 import tiktoken
 import torch
 import torch.nn as nn
+from self_attention.multi_attention import MultiHeadAttention
 
 # Sample input texts
 texts = [
@@ -40,6 +41,7 @@ cfg = {
     "drop_rate": 0.1,
     "num_layers": 12,
     "bias": False, 
+    "heads": 12,
 }
 
 # ============================
@@ -70,11 +72,34 @@ class FeedForward(nn.Module):
         
     def forward(self, x):
         return self.layers(x)
+# Define the layer normalization
+class LayerNorm(nn.Module):
+    def __init__(self, ):
+        super().__init__()
+        self.eps= 1e-5
+        self.scale= nn.Parameter(torch.ones(cfg["emb_dim"]))
+        self.shift= nn.Parameter(torch.zeros(cfg["emb_dim"]))
 
+    def forward(self, x):
+        mean= x.mean(-1, keepdim= True)
+        var= x.var(-1, keepdim= True, unbiased= False)
+        norm_x= (x - mean) / torch.sqrt(var + self.eps)
+        return self.scale * norm_x + self.shift
+    
 # Define transformer block
 class TransformerBlock(nn.Module):
     def __init__(self):
         super().__init__()
+        self.attn = MultiHeadAttention(
+            d_in= cfg["emb_dim"],
+            d_out= cfg["emb_dim"],
+            num_heads= cfg["heads"],
+            context_length= cfg["context_length"],
+            drop= cfg["drop_rate"],
+            bias= cfg["bias"],
+        )
+        self.ffn= FeedForward(cfg= cfg)
+        self.norm1= LayerNorm()
 
     def forward(self, x):
         return x
