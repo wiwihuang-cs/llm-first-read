@@ -98,10 +98,23 @@ class TransformerBlock(nn.Module):
             drop= cfg["drop_rate"],
             bias= cfg["bias"],
         )
-        self.ffn= FeedForward(cfg= cfg)
-        self.norm1= LayerNorm()
+        self.ffn = FeedForward(cfg= cfg)
+        self.norm1 = LayerNorm()
+        self.norm2 = LayerNorm()
+        self.drop_shortcut = nn.Dropout(cfg["drop_rate"])
 
     def forward(self, x):
+        short_cut = x
+        x = self.norm1(x)
+        x = self.attn(x)
+        x = self.drop_shortcut(x)
+        x = x + short_cut
+
+        short_cut = x
+        x = self.norm2(x)
+        x = self.ffn(x)
+        x = self.drop_shortcut(x)
+        x = x + short_cut
         return x
 
 # Define GPT-2 model    
