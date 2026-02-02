@@ -20,7 +20,9 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(drop)
         self.register_buffer(
             'mask',
-            torch.tril(torch.ones(context_length, context_length))            
+
+            # the diagnal=1 ensures that the current token can also attend to itself
+            torch.tril(torch.ones(context_length, context_length), diagonal= 1)            
         )
 
     def forward(self, x):
