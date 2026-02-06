@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_in, d_out, heads, context_length, drop= 0.1, bias= False):
+    def __init__(self, d_in, d_out, heads, context_length, drop_rate= 0.1, bias= False):
         super().__init__()
         assert d_out % heads == 0, "d_out must be divisible by number of heads"
 
@@ -11,12 +11,10 @@ class MultiHeadAttention(nn.Module):
         self.W_k = nn.Linear(d_in, d_out, bias=bias)
         self.W_v = nn.Linear(d_in, d_out, bias=bias)
         
-        self.dropout = nn.Dropout(drop)
+        self.dropout = nn.Dropout(drop_rate)
         self.register_buffer(
             'mask',
-
-            # the diagnal=1 ensures that the current token can also attend to itself
-            torch.tril(torch.ones(context_length, context_length), diagonal= 1)            
+            torch.triu(torch.ones(context_length, context_length), diagonal=1)            
         )
 
         # Multi-head settings
@@ -40,11 +38,16 @@ class MultiHeadAttention(nn.Module):
         queries = queries.transpose(1, 2)
         values = values.transpose(1, 2)
 
-        attn_scores = queries @ keys.transpose(2, 3)
-        mask_bool = self.mask.bool()[:num_tokens, :num_tokens]
-        causal_attn_scores = attn_scores.masked_fill(mask_bool, -torch.inf)
+        attn_scores = queries @ keys.transpose(-1, -2)
 
-        attn_weights = torch.softmax(causal_attn_scores / (self.d_heads ** 0.5), dim=-1)
+        mask = self.mask.bool()[:num_tokens, :num_tokens]
+        causal_attn_scores = attn_scores.masked_fill(mask, -torch.inf)
+
+        attn_weights = torch.softmax(
+            causal_attn_scores / (self.d_heads ** 0.5), 
+            dim=-1
+        )
+
         attn_weights = self.dropout(attn_weights)
 
         # Calculate context vectors
