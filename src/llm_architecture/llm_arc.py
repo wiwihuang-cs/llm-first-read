@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from self_attention.multi_attention import MultiHeadAttention
+from src.self_attention.multi_attention import MultiHeadAttention
 
 # Model configuration
 cfg = {
