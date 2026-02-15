@@ -1,0 +1,25 @@
+data: 
+  path: "data/the-verdict.txt"
+  encoding: "utf-8"
+  split_ratio: 0.9
+  data_loader: 
+    context_length: 256
+    stride: 128
+    batch_size: 2
+    shuffle: true
+    drop_last: true
+model:
+  vocab_size: 50257
+  context_length: 1024
+  emb_dim: 768
+  drop_rate: 0.1
+  layers_num: 12
+  bias: False
+  heads_num: 12
+  device: "cpu"
+train:
+  learning_rate: 0.0004
+  epochs_num: 10
+  eval_freq: 5
+  eval_iter: 5
+  
